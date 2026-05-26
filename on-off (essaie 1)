@@ -1,0 +1,53 @@
+#include "DHT.h"
+// --- Configuration du Seuil de Température ---
+const float SEUIL_TEMPERATURE = 30.0;
+
+// Initialisation du capteur DHT
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  // Initialisation du moniteur série
+  Serial.begin(9600);
+  Serial.println("Systeme de controle pret.");
+
+  // Initialisation du DHT22
+  dht.begin();
+
+  // Configuration de la broche du relais
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW); // Ventilateur éteint par défaut
+}
+
+void loop() {
+  // Pause de 2 secondes entre les mesures
+  delay(2000);
+
+  // Lecture des données
+  float humidite = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  // Sécurité en cas de mauvais branchement du capteur
+  if (isnan(humidite) || isnan(temperature)) {
+    Serial.println("Erreur: Impossible de lire le capteur DHT22 sur D5 !");
+    return;
+  }
+
+  // Affichage des valeurs lues
+  Serial.print("Humidite: ");
+  Serial.print(humidite);
+  Serial.print(" % \t Température: ");
+  Serial.print(temperature);
+  Serial.println(" *C");
+
+  // --- Comparaison avec le seuil (LOGIQUE INVERSÉE CORRIGÉE) ---
+  if (temperature >= SEUIL_TEMPERATURE) {
+    digitalWrite(RELAY_PIN, LOW);  // Envoie LOW pour ALLUMER le relais
+    Serial.println("Statut Ventilateur: ON");
+  } 
+  else {
+    digitalWrite(RELAY_PIN, HIGH); // Envoie HIGH pour ÉTEINDRE le relais
+    Serial.println("Statut Ventilateur: OFF");
+  }
+  
+  Serial.println("---------------------------------------------");
+}
