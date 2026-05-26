@@ -1,0 +1,35 @@
+#include <DHT.h>
+
+#define DHTPIN 8
+#define DHTTYPE DHT22
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+  Serial.println("Capteur DHT22 demarre");
+}
+
+void loop() {
+
+  float temperature = dht.readTemperature();
+  float humidite = dht.readHumidity();
+
+  if (isnan(temperature) || isnan(humidite)) {
+    Serial.println("Erreur lecture DHT22");
+    return;
+  }
+
+  Serial.print("Temperature : ");
+  Serial.print(temperature);
+  Serial.println(" °C");
+
+  Serial.print("Humidite : ");
+  Serial.print(humidite);
+  Serial.println(" %");
+
+  Serial.println("----------------");
+
+  delay(2000);
+}
