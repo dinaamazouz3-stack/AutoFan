@@ -1,0 +1,54 @@
+\\ afin d'éviter l'activation du ventilo avant l'initialisation du capteur on a modifié le code précédent 
+#include "DHT.h"
+
+#define DHTPIN 5          
+#define DHTTYPE DHT22     
+#define RELAY_PIN 7       
+
+// --- Paramètres de Seuil avec Marge (Hystérésis) ---
+const float SEUIL_ALLUMAGE = 40.0; // Température pour démarrer le ventilateur
+const float SEUIL_EXTINCTION = 39.5; // Température pour stopper le ventilateur
+
+// Variable pour retenir l'état actuel du ventilateur
+bool ventilateurEstActif = false; 
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  pinMode(RELAY_PIN, OUTPUT);
+  
+  // On éteint au démarrage (Logique inversée : HIGH = OFF)
+  digitalWrite(RELAY_PIN, HIGH); 
+}
+
+void loop() {
+  delay(2000); // Pause obligatoire pour le DHT22
+
+  float humidite = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  if (isnan(humidite) || isnan(temperature)) {
+    Serial.println("Erreur DHT22");
+    return;
+  }
+
+  // --- Logique d'Hystérésis anti-clignotement ---
+  if (temperature >= SEUIL_ALLUMAGE && !ventilateurEstActif) {
+    // La température est trop haute, on ALLUME
+    digitalWrite(RELAY_PIN, LOW); // LOW = ON pour votre relais
+    ventilateurEstActif = true;
+    Serial.println("Ventilateur: [ ON ] (Seuil d'allumage atteint)");
+  } 
+  else if (temperature < SEUIL_EXTINCTION && ventilateurEstActif) {
+    // La température est redescendue assez bas, on ÉTEINT
+    digitalWrite(RELAY_PIN, HIGH); // HIGH = OFF pour votre relais
+    ventilateurEstActif = false;
+    Serial.println("Ventilateur: [ OFF ] (Température refroidie)");
+  }
+
+  // Affichage simple pour le suivi
+  Serial.print("Temp: "); Serial.print(temperature); Serial.print(" *C | ");
+  Serial.print("Etat Ventilo: "); Serial.println(ventilateurEstActif ? "ALLUME" : "ETEINT");
+}
