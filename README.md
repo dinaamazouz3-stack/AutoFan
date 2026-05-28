@@ -1,4 +1,4 @@
-présentation du projet:
-[📄 Voir le rapport](presentation.pdf)
-Répartition des taches:
-[📄 Voir le rapport](Repartition_des_taches.pdf)
+présentation du projet:<br>
+[📄 Voir le rapport](presentation.pdf)<br>
+Répartition des taches:<br>
+[📄 Voir le fichier](Repartition.pdf)<br>
